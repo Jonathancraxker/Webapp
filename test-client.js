@@ -1,6 +1,6 @@
 const net = require('net');
 
-const HOST = '3.144.149.173';
+const HOST = '18.191.218.236';
 const PORT = 6061;
 
 const client = new net.Socket();
@@ -10,7 +10,7 @@ client.connect(PORT, HOST, () => {
   console.log('--- CONECTADO AL SERVIDOR TCP EC2 ---');
 
   // 1. Probar inserción
-  const noticia = { titulo: "Noticia Socket TCP en peligro", contenido: "Noticia de Claudia Sheinbaum", autor: "Jonathan", usuarioId: 3 };
+  const noticia = { titulo: "Noticia Socket TCP en peligro", contenido: "Noticia de Claudia Sheinbaum", autor: "Jonathan", usuarioId: 1 };
   const mensajeInsert = `{insert:${JSON.stringify(noticia)}}`;
   
   console.log('Enviando comando:', mensajeInsert);
