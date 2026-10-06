@@ -27,7 +27,6 @@ jobs:
         run: npm test -- --verbose
 
   # 2. Compilar y subir la imagen a Docker Hub
-  # 2. Compilar y subir la imagen a Docker Hub
   build-and-push:
     needs: test
     runs-on: ubuntu-latest
@@ -48,7 +47,7 @@ jobs:
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/webapp:latest
-            \({{ secrets.DOCKERHUB_USERNAME }}/webapp:\){{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/webapp:{{ github.sha }}
 
   # 3. Despliegue automático en AWS EC2
   deploy:
