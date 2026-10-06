@@ -1,0 +1,67 @@
+name: CI/CD Pipeline - Webapp
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  # 1. Batería de pruebas unitarias y cobertura
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests & coverage
+        run: npm test -- --verbose
+
+  # 2. Compilar y subir la imagen a Docker Hub
+  build-and-push:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/webapp:latest
+            \({{ secrets.DOCKERHUB_USERNAME }}/webapp:\){{ github.sha }}
+
+  # 3. Despliegue automático en AWS EC2
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH and Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/webapp:latest
+            sudo docker stop webapp-container || true
+            sudo docker rm webapp-container || true
+            sudo docker run -d -p 80:80 -p 6061:6061 --restart unless-stopped --name webapp-container ${{ secrets.DOCKERHUB_USERNAME }}/webapp:latest
