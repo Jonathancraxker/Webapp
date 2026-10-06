@@ -26,9 +26,10 @@ jobs:
       - name: Run unit tests & coverage
         run: npm test -- --verbose
 
-  # 2. Compilar y subir la imagen a Docker Hub
+  # 2. Compilar y subir la imagen a Docker Hub (solo en push a main)
   build-and-push:
     needs: test
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -47,11 +48,12 @@ jobs:
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/webapp:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/webapp:{{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/webapp:${{ github.sha }}
 
-  # 3. Despliegue automático en AWS EC2
+  # 3. Despliegue automático en AWS EC2 (solo en push a main)
   deploy:
     needs: build-and-push
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
       - name: SSH and Deploy to EC2
