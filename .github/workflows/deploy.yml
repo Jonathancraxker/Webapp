@@ -27,6 +27,7 @@ jobs:
         run: npm test -- --verbose
 
   # 2. Compilar y subir la imagen a Docker Hub
+  # 2. Compilar y subir la imagen a Docker Hub
   build-and-push:
     needs: test
     runs-on: ubuntu-latest
