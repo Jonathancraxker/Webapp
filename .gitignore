@@ -1,4 +1,4 @@
-# Ignorar archivos de configuración locales
 *.env
-# Ignorar archivos de dependencias
+backups/
+data/
 /node_modules/
