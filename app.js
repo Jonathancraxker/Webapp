@@ -17,7 +17,7 @@ app.use(express.json());
 app.get('/', (req, res) => {
   res.status(200).json({
     statusCode: 200,
-    data: { mensaje: 'Ta jalando al 100 el maistro: Jonathan Cruz Cruz' }
+    data: { mensaje: 'Ta jalando al 200 el chalan: Jonathan + +' }
   });
 });
 
