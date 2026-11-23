@@ -1,4 +1,4 @@
-name: CI/CD Pipeline - Webapp
+name: CI/CD Pipeline - Doriga_News (Pruebas, Docker Alpine & OpenObserve)
 
 on:
   push:
@@ -7,63 +7,166 @@ on:
     branches: ["main"]
 
 jobs:
-  # 1. Batería de pruebas unitarias y cobertura
-  test:
+  # ==========================================================================
+  # 1. PRUEBAS INTEGRALES (JEST + PLAYWRIGHT) Y REPORTE A OPENOBSERVE (RF-01, RF-03)
+  # ==========================================================================
+  test-and-report:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout del repositorio
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Configurar Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
 
-      - name: Install dependencies
+      - name: Instalar dependencias de Backend
         run: npm ci
 
-      - name: Run unit tests & coverage
+      - name: Instalar dependencias y compilar Frontend React
+        run: |
+          cd client
+          npm ci
+          npm run build
+
+      - name: Instalar navegador Chromium para Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Ejecutar pruebas unitarias y de integración Backend (Jest)
         run: npm test -- --verbose
 
-  # 2. Compilar y subir la imagen a Docker Hub (solo en push a main)
+      - name: Ejecutar pruebas End-to-End Full-Stack (Playwright)
+        run: npm run test:e2e
+
+      - name: Transmitir resultado de ejecución de pruebas a OpenObserve (RF-03)
+        if: always()
+        env:
+          OO_URL: ${{ secrets.OPENOBSERVE_URL }}
+          OO_TOKEN: ${{ secrets.OPENOBSERVE_TOKEN }}
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          TIMESTAMP_MX=$(TZ='America/Mexico_City' date -Iseconds)
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          STATUS_LABEL="SUCCESS"
+          LEVEL="INFO"
+          MSG="Suite completa aprobada (26 Jest + 23 Playwright) en commit ${SHORT_SHA}"
+
+          if [ "$JOB_STATUS" != "success" ]; then
+            STATUS_LABEL="FAILURE"
+            LEVEL="ERROR"
+            MSG="FALLO en pruebas automatizadas (Jest/Playwright) - Despliegue SSH bloqueado en commit ${SHORT_SHA}"
+          fi
+
+          curl -s -X POST "${OO_URL}/api/default/cicd_pipeline/_json" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Basic ${OO_TOKEN}" \
+            -d "[{
+              \"event_type\": \"TEST_EXECUTION\",
+              \"level\": \"${LEVEL}\",
+              \"status\": \"${STATUS_LABEL}\",
+              \"message\": \"${MSG}\",
+              \"commit_id\": \"${{ github.sha }}\",
+              \"commit_short\": \"${SHORT_SHA}\",
+              \"branch\": \"${{ github.ref_name }}\",
+              \"actor\": \"${{ github.actor }}\",
+              \"repository\": \"${{ github.repository }}\",
+              \"run_id\": \"${{ github.run_id }}\",
+              \"timestamp_mx\": \"${TIMESTAMP_MX}\"
+            }]"
+
+      - name: Guardar reporte HTML de Playwright como artefacto
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+  # ==========================================================================
+  # 2. CONSTRUIR Y SUBIR IMAGEN ALPINE CON VERSIÓN DE GIT (RF-02)
+  # ==========================================================================
   build-and-push:
-    needs: test
-    if: github.event_name == 'push'
+    needs: test-and-report
+    if: success() && github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout del repositorio
         uses: actions/checkout@v4
 
-      - name: Log in to Docker Hub
+      - name: Iniciar sesión en Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push Docker image
+      - name: Construir y publicar imagen Docker Alpine
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
+          build-args: |
+            APP_VERSION=1.2.${{ github.run_number }}-${{ github.sha }}
+            GIT_SHA=${{ github.sha }}
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/webapp:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/webapp:${{ github.sha }}
 
-  # 3. Despliegue automático en AWS EC2 (solo en push a main)
+  # ==========================================================================
+  # 3. DESPLIEGUE CONDICIONADO EN AWS EC2 Y REGISTRO EN OPENOBSERVE (RF-02, RF-03)
+  # ==========================================================================
   deploy:
     needs: build-and-push
-    if: github.event_name == 'push'
+    if: success() && github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
-      - name: SSH and Deploy to EC2
+      - name: Desplegar contenedor en AWS EC2 vía SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            mkdir -p /home/ubuntu/webapp_data
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/webapp:latest
             sudo docker stop webapp-container || true
             sudo docker rm webapp-container || true
-            sudo docker run -d -p 80:80 -p 6061:6061 --restart unless-stopped --name webapp-container ${{ secrets.DOCKERHUB_USERNAME }}/webapp:latest
+            sudo docker run -d \
+              -p 80:80 \
+              -p 6061:6061 \
+              -v /home/ubuntu/webapp_data:/app/data \
+              -e TZ=America/Mexico_City \
+              -e OPENOBSERVE_URL="${{ secrets.OPENOBSERVE_URL }}" \
+              -e OPENOBSERVE_ORG="default" \
+              -e OPENOBSERVE_TOKEN="${{ secrets.OPENOBSERVE_TOKEN }}" \
+              -e APP_VERSION="1.2.${{ github.run_number }}-${{ github.sha }}" \
+              -e GIT_SHA="${{ github.sha }}" \
+              --restart unless-stopped \
+              --name webapp-container \
+              ${{ secrets.DOCKERHUB_USERNAME }}/webapp:latest
+
+      - name: Registrar evento de despliegue completado en OpenObserve (RF-03)
+        if: success()
+        env:
+          OO_URL: ${{ secrets.OPENOBSERVE_URL }}
+          OO_TOKEN: ${{ secrets.OPENOBSERVE_TOKEN }}
+        run: |
+          TIMESTAMP_MX=$(TZ='America/Mexico_City' date -Iseconds)
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          curl -s -X POST "${OO_URL}/api/default/cicd_pipeline/_json" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Basic ${OO_TOKEN}" \
+            -d "[{
+              \"event_type\": \"DEPLOYMENT_COMPLETED\",
+              \"level\": \"INFO\",
+              \"status\": \"DEPLOYED\",
+              \"message\": \"Despliegue exitoso en AWS EC2 - Versión 1.2.${{ github.run_number }}-${SHORT_SHA}\",
+              \"commit_id\": \"${{ github.sha }}\",
+              \"commit_short\": \"${SHORT_SHA}\",
+              \"branch\": \"${{ github.ref_name }}\",
+              \"actor\": \"${{ github.actor }}\",
+              \"repository\": \"${{ github.repository }}\",
+              \"run_id\": \"${{ github.run_id }}\",
+              \"timestamp_mx\": \"${TIMESTAMP_MX}\"
+            }]"

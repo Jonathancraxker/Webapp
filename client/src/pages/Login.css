@@ -1,0 +1,121 @@
+.auth-page {
+  min-height: 100vh;
+  background-color: var(--news-bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.auth-box {
+  background: var(--news-paper);
+  border: 1px solid var(--news-border);
+  border-top: 5px solid var(--news-red);
+  width: 100%;
+  max-width: 430px;
+  padding: 2.25rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+.auth-masthead {
+  text-align: center;
+  border-bottom: 2px solid var(--news-ink);
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.auth-masthead h1 {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.9rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.auth-masthead h1 span {
+  color: var(--news-red);
+}
+
+.auth-masthead p {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--news-muted);
+  margin-top: 0.25rem;
+}
+
+.auth-title {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  color: var(--news-ink);
+}
+
+.auth-field {
+  margin-bottom: 1.1rem;
+}
+
+.auth-field label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--news-muted);
+  margin-bottom: 0.35rem;
+}
+
+.auth-field input,
+.auth-field select {
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--news-border);
+  border-radius: 3px;
+  font-size: 0.95rem;
+  background-color: #ffffff;
+  color: var(--news-ink);
+}
+
+.auth-field input:focus,
+.auth-field select:focus {
+  outline: none;
+  border-color: var(--news-ink);
+}
+
+.auth-btn {
+  width: 100%;
+  padding: 0.8rem;
+  background-color: var(--news-red);
+  color: #ffffff;
+  border: none;
+  border-radius: 3px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  margin-top: 0.5rem;
+}
+
+.auth-btn:hover {
+  background-color: var(--news-red-hover);
+}
+
+.auth-footer {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--news-border);
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--news-muted);
+}
+
+.auth-footer a {
+  color: var(--news-red);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.auth-footer a:hover {
+  text-decoration: underline;
+}

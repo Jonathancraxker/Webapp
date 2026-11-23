@@ -1,0 +1,51 @@
+:root {
+  --news-navy: #0f172a;
+  --news-red: #b91c1c;
+  --news-red-hover: #991b1b;
+  --news-bg: #f4f4f0;
+  --news-paper: #ffffff;
+  --news-ink: #111827;
+  --news-muted: #4b5563;
+  --news-border: #d1d5db;
+  --news-success: #065f46;
+  --news-success-bg: #d1fae5;
+  --news-error: #991b1b;
+  --news-error-bg: #fee2e2;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--news-bg);
+  color: var(--news-ink);
+  line-height: 1.55;
+}
+
+.editorial-font {
+  font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+.alert-banner {
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.alert-banner.error {
+  background-color: var(--news-error-bg);
+  color: var(--news-error);
+  border-left: 4px solid var(--news-red);
+}
+
+.alert-banner.success {
+  background-color: var(--news-success-bg);
+  color: var(--news-success);
+  border-left: 4px solid #059669;
+}

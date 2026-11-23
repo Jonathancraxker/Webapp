@@ -1,0 +1,126 @@
+.news-header {
+  background-color: var(--news-paper);
+  border-bottom: 3px solid var(--news-ink);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.news-topbar {
+  background-color: var(--news-navy);
+  color: #f8fafc;
+  padding: 0.4rem 2rem;
+  font-size: 0.78rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.breaking-pill {
+  background-color: var(--news-red);
+  color: #ffffff;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 2px;
+  margin-right: 0.5rem;
+}
+
+.health-pill {
+  background-color: rgba(16, 185, 129, 0.2);
+  color: #6ee7b7;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.news-masthead {
+  padding: 1.25rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  border-bottom: 1px solid var(--news-border);
+}
+
+.masthead-title {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: var(--news-ink);
+  text-transform: uppercase;
+}
+
+.masthead-title span {
+  color: var(--news-red);
+}
+
+.masthead-sub {
+  font-size: 0.8rem;
+  color: var(--news-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.news-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.65rem 2rem;
+  background-color: #f8fafc;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.nav-links {
+  display: flex;
+  gap: 1rem;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: var(--news-ink);
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.4rem 0.8rem;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s;
+}
+
+.nav-link:hover {
+  color: var(--news-red);
+}
+
+.nav-link.active {
+  color: var(--news-red);
+  border-bottom-color: var(--news-red);
+}
+
+.user-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  font-size: 0.85rem;
+}
+
+.btn-logout {
+  background-color: var(--news-ink);
+  color: #ffffff;
+  border: none;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+.btn-logout:hover {
+  background-color: var(--news-red);
+}
