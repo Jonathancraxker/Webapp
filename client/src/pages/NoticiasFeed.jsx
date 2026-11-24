@@ -79,7 +79,7 @@ export default function NoticiasFeed({ user, health }) {
         <header className="public-masthead">
           <div>
             <Link to="/noticias-feed" className="public-masthead-brand">
-              DORIGA<span>NEWS</span>
+              ERROR<span>PRUEBA</span>
             </Link>
             <div style={{ fontSize: '0.78rem', color: 'var(--news-muted)' }}>
               Portal Público de Noticias · v{health?.version || '1.1.1'}
