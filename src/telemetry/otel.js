@@ -10,11 +10,12 @@ const { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } = require('@opentelemetry/sema
 
 const OPENOBSERVE_URL = process.env.OPENOBSERVE_URL || 'http://18.191.218.236:5080';
 const OPENOBSERVE_ORG = process.env.OPENOBSERVE_ORG || 'default';
-const OPENOBSERVE_TOKEN = process.env.OPENOBSERVE_TOKEN || 'YWRtaW5AdXRlcS5lZHUubXg6Q29tcGxleFBhc3N3b3JkIzIwMjY=';
+const OPENOBSERVE_TOKEN = process.env.OPENOBSERVE_TOKEN || 'YWRtaW5AdXRlcS5lZHUubXg6bzJvaV9mRFBrc1IyTzY3UFp4Z0NOMEsyT2V3MXNPSWY2TTlmRA==';
 const APP_VERSION = process.env.APP_VERSION || '1.1.1';
 
 const otlpHeaders = {
-  Authorization: `Basic ${OPENOBSERVE_TOKEN}`
+  Authorization: `Basic ${OPENOBSERVE_TOKEN}`,
+  'stream-name': 'default'
 };
 
 let sdk = null;
